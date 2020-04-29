@@ -60,3 +60,4 @@ certs
 confdefs.h
 conftest.*
 mstest.*
+.vscode/**

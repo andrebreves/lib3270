@@ -104,6 +104,21 @@ case "$host" in
 
 		;;
 
+	*-apple-darwin*)
+		CFLAGS="$CFLAGS -pthread -DCONFDIR=\$(confdir) -DDATADIR=\$(datadir) -DLOCALEDIR=\$(localedir)"
+		LDFLAGS="$LDFLAGS -pthread"
+		LIBS="$LIBS -framework CoreFoundation"
+		app_cv_osname="macos"
+		LOGDIR="/var/log"
+		DLLEXT=".so"
+		DLL_LDFLAGS="-shared -Wl,-install_name,\$(@F)"
+
+		INSTALL_PACKAGES="linux-lib ${INSTALL_PACKAGES}"
+
+		app_cv_static='no'
+
+		;;
+
  	*)
 		CFLAGS="$CFLAGS -pthread -DCONFDIR=\$(confdir) -DDATADIR=\$(datadir) -DLOCALEDIR=\$(localedir)"
 		LDFLAGS="$LDFLAGS -pthread"
@@ -217,6 +232,10 @@ AC_CHECK_HEADER(libintl.h, [
 		INTL_LIBS="-lintl"
 		;;
 
+	*-apple-darwin*)
+		INTL_LIBS="-lintl"
+		;;
+
 	*)
 		INTL_LIBS=""
 
@@ -277,7 +296,7 @@ rm -f conftest.$ac_objext conftest.err m4_ifval([$1], [conftest.$ac_ext])[]dnl
 ])# GLIB_CHECK_COMPILE_WARNINGS
 
 AC_MSG_CHECKING(for GNUC visibility attribute)
-GLIB_CHECK_COMPILE_WARNINGS([
+GLIB_CHECK_COMPILE_WARNINGS([AC_LANG_SOURCE([[
 void
 __attribute__ ((visibility ("hidden")))
      f_hidden (void)
@@ -306,7 +325,7 @@ int main (int argc, char **argv)
         f_default();
         return 0;
 }
-],g_have_gnuc_visibility=yes,g_have_gnuc_visibility=no)
+]])],g_have_gnuc_visibility=yes,g_have_gnuc_visibility=no)
 AC_MSG_RESULT($g_have_gnuc_visibility)
 if test x$g_have_gnuc_visibility = xyes; then
   AC_DEFINE(HAVE_GNUC_VISIBILITY, 1, [supports GCC visibility attributes])
@@ -510,7 +529,7 @@ dnl Check for headers
 dnl ---------------------------------------------------------------------------
 
 AC_CHECK_HEADER(malloc.h, AC_DEFINE(HAVE_MALLOC_H,,[do we have malloc.h?]))
-AC_CHECK_HEADER(syslog.h, AC_DEFINE(HAVE_SYSLOG,,[do we have malloc.h?]))
+AC_CHECK_HEADER(syslog.h, AC_DEFINE(HAVE_SYSLOG,,[do we have syslog.h?]))
 
 AC_CHECK_FUNCS(getaddrinfo, AC_DEFINE(HAVE_GETADDRINFO) )
 AC_CHECK_FUNC(vasprintf, AC_DEFINE(HAVE_VASPRINTF) )
